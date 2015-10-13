@@ -5,7 +5,7 @@ var endpointURL,
 
 endpointURL = 'https://api.uber.com/v1/estimates/price';
 resultsList = [];
-server_token = 'R6L9oIpQhY7nCvyQkuDGFMw4yZDDiyVn-pjsjx33';
+server_token = '2Ct9b5cnLq9nR5MRfY0_cNXRloKQpqirnKRYyoHc';
 
 coordsList = [
   {
@@ -56,14 +56,14 @@ coordsList = [
       lat: 37.76257272,
       lon: -122.46734619
     }
-  },
-  {
-    name: "Potrero",
-    coords: {
-      lat: 37.76148705,
-      lon: -122.40022659
-    }
   }
+  //,{
+  //  name: "Potrero",
+  //  coords: {
+  //    lat: 37.76148705,
+  //    lon: -122.40022659
+  //  }
+  //}
 ];
 
 function callUberAPI(){

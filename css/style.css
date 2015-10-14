@@ -12,19 +12,24 @@ body {
   border: 1px solid black;
 }
 
-.data > div {
+.aSet {
+  clear: both;
+  padding: 10px;
+}
+
+.row > div {
   float: left;
 }
 
-.data .neigbourhood, .data .time {
+.row .neigbourhood, .row .time {
   width: 40%;
 }
 
-.data .neigbourhood {
+.row .neigbourhood {
   text-align: right;
 }
 
-.data .surge {
+.row .surge {
   text-align: center;
   width: 20%;
 }

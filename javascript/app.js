@@ -159,7 +159,7 @@ function processSurgeData(data){
       return ((a > b) ? -1 : ((a < b) ? 1 : 0));
     });
 
-    var newSet = $('<div>');
+    var newSet = $('<div class="aSet">');
     unprepedData.each(function(index, item)
     {
       var splitItem, locNumber, neigbourhood, surge, timestamp, time;
@@ -172,9 +172,11 @@ function processSurgeData(data){
               time = timestamp.toTimeString().replace(/GMT[+-]\d*\s/, '') + ' ' + timestamp.toDateString();
 
       newSet.prepend(
-        "<div class='neigbourhood'>"+ neigbourhood +"</div>" +
-        "<div class='surge'>"+ surge +"</div>" +
-        "<div class='time'>"+ time +"</div>"
+        "<div class='row'>" +
+          "<div class='neigbourhood'>"+ neigbourhood +"</div>" +
+          "<div class='surge'>"+ surge +"</div>" +
+          "<div class='time'>"+ time +"</div>" +
+        "</div>"
       );
     });
     $('.data').prepend(newSet);

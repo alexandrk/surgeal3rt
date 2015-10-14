@@ -1,5 +1,6 @@
 body {
   font-family: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+  font-size: 4vw;
 }
 
 .unprepedData {
@@ -8,6 +9,7 @@ body {
 
 .data > hr {
   clear: both;
+  border: 1px solid black;
 }
 
 .data > div {

@@ -13,8 +13,9 @@ body {
 }
 
 .aSet {
-  clear: both;
+  overflow: auto;
   padding: 10px;
+  border-bottom: 1px solid black;
 }
 
 .row > div {

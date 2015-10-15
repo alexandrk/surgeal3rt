@@ -89,25 +89,25 @@ function callUberAPI(){
 }
 
 function mockData(){
-  if ($('.data').find('.surge').length === 0) {
-    $('.data')[0].innerHTML = '----| MOCK DATA |----<hr />' +
-      '<div class="neigbourhood">Downtown</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">NorthBeach</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Penhandle</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Marina</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Mission</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Richmond</div><div class="surge">1.3</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Sunset</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<hr />' +
-      '<div class="neigbourhood">Downtown</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">NorthBeach</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Penhandle</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Marina</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Mission</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Richmond</div><div class="surge">1.3</div><div class="time">12:09:51 (PDT)</div>' +
-      '<div class="neigbourhood">Sunset</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>'
-    ;
-  }
+  //if ($('.data').find('.surge').length === 0) {
+  //  $('.data')[0].innerHTML = '----| MOCK DATA |----<hr />' +
+  //    '<div class="neigbourhood">Downtown</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">NorthBeach</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Penhandle</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Marina</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Mission</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Richmond</div><div class="surge">1.3</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Sunset</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<hr />' +
+  //    '<div class="neigbourhood">Downtown</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">NorthBeach</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Penhandle</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Marina</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Mission</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Richmond</div><div class="surge">1.3</div><div class="time">12:09:51 (PDT)</div>' +
+  //    '<div class="neigbourhood">Sunset</div><div class="surge">1</div><div class="time">12:09:51 (PDT)</div>'
+  //  ;
+  //}
 }
 
 callUberAPI();
@@ -169,7 +169,7 @@ function processSurgeData(data){
       neigbourhood = splitItem[1];
              surge = splitItem[3];
          timestamp = (new Date(parseInt(splitItem[4])));
-              time = timestamp.toTimeString().replace(/GMT[+-]\d*\s/, '') + ' ' + timestamp.toDateString();
+              time = timestamp.toTimeString().replace(/GMT[+-]\d*\s/, '');  // + ' ' + timestamp.toDateString();
 
       newSet.prepend(
         "<div class='row'>" +

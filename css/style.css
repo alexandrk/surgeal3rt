@@ -18,19 +18,39 @@ body {
   border-bottom: 1px solid black;
 }
 
+.row {
+  clear: both;
+  display: block;
+  overflow: auto;
+}
+
+.header {
+  border-bottom: 1px solid black;
+  padding-bottom: 8px;
+}
+
 .row > div {
   float: left;
 }
 
-.row .neigbourhood, .row .time {
-  width: 40%;
+.row .neighbourhood, .row .surge {
+  width: 45%;
 }
 
-.row .neigbourhood {
+.row .neighbourhood {
   text-align: right;
 }
 
 .row .surge {
   text-align: center;
-  width: 20%;
+}
+
+.row .serviceType {
+  float: left;
+  margin-left: 15%;
+}
+
+.row .time {
+  float: right;
+  margin-right: 10%;
 }

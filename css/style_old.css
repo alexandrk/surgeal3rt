@@ -1,0 +1,28 @@
+body {
+  font-family: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+}
+
+.unprepedData {
+  display: none;
+}
+
+.data > hr {
+  clear: both;
+}
+
+.data > div {
+  float: left;
+}
+
+.data .neigbourhood, .data .time {
+  width: 40%;
+}
+
+.data .neigbourhood {
+  text-align: right;
+}
+
+.data .surge {
+  text-align: center;
+  width: 20%;
+}

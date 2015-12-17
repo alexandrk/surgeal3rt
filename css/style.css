@@ -1,5 +1,6 @@
 body {
   font-family: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+  font-size: 4vw;
 }
 
 .unprepedData {
@@ -8,21 +9,48 @@ body {
 
 .data > hr {
   clear: both;
+  border: 1px solid black;
 }
 
-.data > div {
+.aSet {
+  overflow: auto;
+  padding: 10px;
+  border-bottom: 1px solid black;
+}
+
+.row {
+  clear: both;
+  display: block;
+  overflow: auto;
+}
+
+.header {
+  border-bottom: 1px solid black;
+  padding-bottom: 8px;
+}
+
+.row > div {
   float: left;
 }
 
-.data .neigbourhood, .data .time {
-  width: 40%;
+.row .neighbourhood, .row .surge {
+  width: 45%;
 }
 
-.data .neigbourhood {
+.row .neighbourhood {
   text-align: right;
 }
 
-.data .surge {
+.row .surge {
   text-align: center;
-  width: 20%;
+}
+
+.row .serviceType {
+  float: left;
+  margin-left: 15%;
+}
+
+.row .time {
+  float: right;
+  margin-right: 10%;
 }

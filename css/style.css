@@ -54,3 +54,17 @@ body {
   float: right;
   margin-right: 10%;
 }
+
+.controls {
+  text-align: center;
+}
+.controls button {
+  width: 16vw;
+  height: 6vw;
+  border-radius: 2vw;
+  background-color: white;
+  border-color: crimson;
+  padding: 0;
+  font-weight: bold;
+  font-size: 2vw;
+}

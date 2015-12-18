@@ -1,13 +1,18 @@
 var
   data = [],
-  uberX = [],
-  lastElement;
+  lastElement,
+  queryDict = {},
+  validTypes = ['uberX', 'uberXL', 'uberWAV', 'uberSELECT', 'UberSUV', 'UberBLACK', 'ASSIST'];
+
+// Helper, populates queryDict with key-value pairs
+location.search.substr(1).split("&").forEach(function(item) {queryDict[item.split("=")[0]] = item.split("=")[1]});
 
 function loadData() {
   var
-    ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
+    ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data"),
+    limit = ( queryDict['limit'] && parseInt(queryDict['limit']) > 0 ) ? parseInt(queryDict['limit']) : 25;
 
-  ref.orderByChild('time').limitToLast(25).on("child_added", function(snapshot) {
+  ref.orderByChild('time').limitToLast(limit).on("child_added", function(snapshot) {
     lastElement = snapshot.val();
     data.push(lastElement);
     $(document).trigger('dataLoaded');
@@ -24,7 +29,7 @@ function getServiceTypeSurge(surgeData, serviceType) {
   return results;
 }
 
-function formatAndOutput( time, values ) {
+function formatAndOutput( time, values, serviceType ) {
   var
     newSet = $('<div class="aSet">'),
     timeObj = ( new Date(parseInt( time ) * 1000) ),
@@ -54,10 +59,13 @@ function formatAndOutput( time, values ) {
 }
 
 $(document).on('dataLoaded', function(){
-  serviceType = "uberX";
-  uberX = getServiceTypeSurge(lastElement.data, serviceType);
+  var
+    serviceType = ( (validTypes.indexOf(queryDict['type']) > 0) ? queryDict['type'] : 'uberX' ),
+    surgeData;
 
-  formatAndOutput(lastElement.time, uberX);
+  surgeData = getServiceTypeSurge(lastElement.data, serviceType);
+
+  formatAndOutput(lastElement.time, surgeData, serviceType);
 });
 
 loadData();

@@ -73,10 +73,11 @@ var app = function() {
    * Description:       Creates an array of objects, that represent surge in a specific area
    * @param surgeData   {object} - contains surge data for all of the service_types
    * @param serviceType {string} - serviceType to get the data for
-   * @returns {Array}
+   * @returns {object}
    */
   function getServiceTypeSurge( surgeData, serviceType ) {
-    var results = [];
+    var results = {},
+        loc;
 
     for ( loc in surgeData ) {
       results[loc] = surgeData[loc][serviceType];
@@ -89,14 +90,15 @@ var app = function() {
    * Name:              formatAndOutput
    * Description:       formats the results and appends them to the page
    * @param time        {unixtimestamp} - time, when the set was requested from Uber API
-   * @param values      {array} of surgeData
+   * @param values      {object} of surgeData
    * @param serviceType {string} - service type of the current set
    */
   function formatAndOutput( time, values, serviceType ) {
     var
       newSet = $('<div class="aSet">'),
       timeObj = ( new Date(parseInt( time ) * 1000) ),
-      time = timeObj.toLocaleTimeString() +' '+ timeObj.toLocaleDateString();
+      time = timeObj.toLocaleTimeString() +' '+ timeObj.toLocaleDateString(),
+      val;
 
     newSet.hide();
 

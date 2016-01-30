@@ -15,6 +15,7 @@
     if ( TEST_DATA === true ){
       DATA = JSON.parse(localStorage.surgeData);
       console.log(DATA.length + ' records loaded');
+      $('body').trigger('dataLoaded');
     }
     else {
       var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
@@ -108,12 +109,14 @@ function GraphData() {
    *******************************************************************************************/
   function setupGraph(targetArea) {
     //min width / height: 635 / 380
-    var outerWidth  = Math.max(635, Number.parseInt(window.innerWidth / 2 * .8)),
-        outerHeight = Math.max(350, Number.parseInt(window.innerHeight / 2 * .8)),
+    var outerWidth  = Math.max(620, Number.parseInt(window.innerWidth / 2 * .8)),
+        outerHeight = Math.max(330, Number.parseInt(window.innerHeight / 2 * .8)),
         margin      = {left: 50, top: 35, right: 30, bottom: 70},
         innerWidth  = outerWidth - margin.left - margin.right,
         innerHeight = outerHeight - margin.top - margin.bottom,
-        xColumn     = 'time';
+        xColumn     = 'time',
+        color = d3.scale.ordinal().range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
 
     var svg = d3
       .select('body')
@@ -156,7 +159,8 @@ function GraphData() {
         yScale: yScale,
          xAxis: xAxis,
          yAxis: yAxis,
-       xColumn: xColumn
+       xColumn: xColumn,
+         color: color
     }
   }
 
@@ -181,7 +185,8 @@ function GraphData() {
       */
       // NOTE: opted for fixed serviceTypes instead of all (automated)
       var serviceTypes = ['uberX', 'uberXL', 'uberSELECT', 'UberBLACK', 'UberSUV'],   //Object.keys(inputData[0].data[targetArea]),
-          lSpace = graph.graphWidth / serviceTypes.length;  // define the length of legend section
+          lSpace = graph.graphWidth / serviceTypes.length,  // define the length of legend section
+          colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf'];
 
       serviceTypes.forEach(function(serviceType, index)
       {
@@ -207,11 +212,13 @@ function GraphData() {
           return Math.max.apply(null, serviceSurge);
         }) );
 
+        var id = (serviceType).replace(/\s+/g, '');
         path.attr('d', line(inputData))
-          .attr('stroke', function() { return "hsl(" + Math.random() * 360 + ", 100%, 75%)" })
+          .attr('stroke', colors.shift())
           .attr('stroke-width', 3)
           .attr('fill', 'none')
-          .attr('class', 'dataLine');
+          .attr('class', 'dataLine')
+          .attr('class', 'line-'+ id);
 
         // Append history name and data to Graph
         graph.graphSVG.append('text')
@@ -219,6 +226,17 @@ function GraphData() {
           .attr('y', 20)
           .attr('fill', path.attr('stroke'))
           .attr('class', 'legend')
+          .on("click", function(){
+            // Determine if current line is visible
+            var active = path.active ? false : true,
+                newOpacity = active ? 0 : 1;
+            // Hide or show the elements based on the ID
+            d3.selectAll('.' + path.attr('class'))
+              .transition().duration(100)
+              .style("opacity", newOpacity);
+            // Update whether or not the elements are active
+            path.active = active;
+          })
           .text(serviceType);
 
       });
@@ -304,7 +322,7 @@ function denseArray() {
 
 $('body').on('dataLoaded', function(){
   var a = GraphData();
-  a.graphRender(DATA);
+  a.graphRender(denseArray());
 });
 
 //render( createServiceCollection(DATA, 'uberX') );

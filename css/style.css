@@ -1,5 +1,5 @@
 body {
-  font-family: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+  font-family: fantasy, "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
   font-size: 4vw;
 }
 
@@ -79,4 +79,19 @@ body {
   stroke: #000;
   stroke-width: 1px;
   shape-rendering: crispEdges;
+}
+
+svg.areaGraph {
+  border: 1px solid black;
+  margin: 10px;
+}
+
+.legend {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+text.targetArea {
+  font-size: 16px;
+  font-weight: bold;
 }

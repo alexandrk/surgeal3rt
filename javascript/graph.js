@@ -2,7 +2,8 @@
 //var app = function() {
 
   var DATA = [],
-      ANCHOR_MAP = $.uriAnchor.makeAnchorMap();
+      ANCHOR_MAP = $.uriAnchor.makeAnchorMap(),
+      TEST_DATA = false;
 
   /**
    * Name:        loadData
@@ -10,32 +11,39 @@
    *              dataloaded event on each new set of data
    */
   function loadData() {
-    var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
 
-    // NOTE: timestamp saved in the firebase db is in seconds, so we need to divide ours by 1000
-    // day    - 86400000    -
-    // week   - 604800000   - 13192
-    // month  - 18144000000 - 19557
+    if ( TEST_DATA === true ){
+      DATA = JSON.parse(localStorage.surgeData);
+      console.log(DATA.length + ' records loaded');
+    }
+    else {
+      var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
 
-    var fromTime = new Date('01/29/16').getTime() / 1000, //(new Date((new Date).setHours(0,0,0,0) - 86400000)).getTime() / 1000,
-        toTime = fromTime + 86400;
+      // NOTE: timestamp saved in the firebase db is in seconds, so we need to divide ours by 1000
+      // day    - 86400000    -
+      // week   - 604800000   - 13192
+      // month  - 18144000000 - 19557
 
-    ref
-      .orderByChild('time')
-      .startAt( fromTime )
-      .endAt( toTime )
-      .once("value", function (snapshot)
-      {
-        var records = snapshot.val(),
-            record;
-        for ( record in records ){
-          if ( records.hasOwnProperty(record) ) {
-            DATA.push(records[record]);
+      var fromTime = new Date().setHours(0,0,0,0) / 1000, //(new Date((new Date).setHours(0,0,0,0) - 86400000)).getTime() / 1000,
+          toTime = fromTime + 86400;
+
+      ref
+        .orderByChild('time')
+        .startAt(fromTime)
+        .endAt(toTime)
+        .once("value", function (snapshot) {
+          var records = snapshot.val(),
+              record;
+          for (record in records) {
+            if (records.hasOwnProperty(record)) {
+              DATA.push(records[record]);
+            }
           }
-        }
-        console.log(DATA.length +' records loaded');
-      })
-    ;
+          console.log(DATA.length + ' records loaded');
+          $('body').trigger('dataLoaded');
+        })
+      ;
+    }
   }
 
 loadData();
@@ -91,71 +99,152 @@ function createServiceCollection( surgeData, serviceType ) {
 //  }
 //}();
 
-function setupGraph() {
+function GraphData() {
 
-  var outerWidth    = Number.parseInt(window.innerWidth / 2 * .8),
-      outerHeight   = Number.parseInt(window.innerHeight / 2 * .8),
-      margin        = {left: 90, top: 30, right: 30, bottom: 30},
-      innerWidth    = outerWidth - margin.left - margin.right,
-      innerHeight   = outerHeight - margin.top - margin.bottom,
-      xColumn       = 'time',
-      yColumn       = 'Marina';
+  /******************************************************************************************
+   * Function: setupGraph
+   * Desc: initializes an object that keeps references to a graph and all the graph related variables
+   * @returns {{graphSVG: *, xAxisG: *, yAxisG: *, xScale: *, yScale: *, xAxis: *, yAxis: *}}
+   *******************************************************************************************/
+  function setupGraph(targetArea) {
+    //min width / height: 635 / 380
+    var outerWidth  = Math.max(635, Number.parseInt(window.innerWidth / 2 * .8)),
+        outerHeight = Math.max(350, Number.parseInt(window.innerHeight / 2 * .8)),
+        margin      = {left: 50, top: 35, right: 30, bottom: 70},
+        innerWidth  = outerWidth - margin.left - margin.right,
+        innerHeight = outerHeight - margin.top - margin.bottom,
+        xColumn     = 'time';
 
-  var svg = d3
-    .select('body')
-    .append('svg')
-    .attr('width', outerWidth)
-    .attr('height', outerHeight);
+    var svg = d3
+      .select('body')
+      .append('svg')
+      .attr('width',  outerWidth)
+      .attr('height', outerHeight)
+      .attr('label',  targetArea)
+      .attr('class',  'areaGraph');
 
-  // group element that allows us to add margin and axises to the chart
-  var g = svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
-      xAxisG = g.append('g')
-        .attr('transform', 'translate(0, ' + innerHeight + ')')
-        .attr('class', 'x axis'),
-      yAxisG = g.append('g')
-        .attr('class', 'x axis');
+    // group element that allows us to add margin and axises to the chart
+    var g = svg.append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
+        xAxisG = g.append('g')
+          .attr('transform', 'translate(0, ' + innerHeight + ')')
+          .attr('class', 'x axis'),
+        yAxisG = g.append('g')
+          .attr('class', 'y axis');
 
 
-  var xScale = d3.time.scale().range([0, innerWidth]),
-      yScale = d3.scale.linear().range([innerHeight, 0]);
+    var xScale = d3.time.scale().range([0, innerWidth]),
+        yScale = d3.scale.linear().range([innerHeight, 0]);
 
-  var xAxis = d3.svg.axis()
-        .scale(xScale)              // xScale is d3.time.scale()
-        .orient('bottom')           // draw ticks below the axis
-        .ticks(4),                  // number of ticks
+    var xAxis = d3.svg.axis()
+          .scale(xScale)              // xScale is d3.time.scale()
+          .orient('bottom')           // draw ticks below the axis
+          .ticks(24),                 // number of ticks
 
-      yAxis = d3.svg.axis()
-        .scale(yScale)              // yScale is d3.scale.linear()
-        .orient('left');
+        yAxis = d3.svg.axis()
+          .scale(yScale)              // yScale is d3.scale.linear()
+          .orient('left');
 
-  function render(data, yColumn) {
+    return {
+      graphSVG: svg,
+        graphG: g,
+    graphWidth: outerWidth,
+   graphHeight: outerHeight,
+        xAxisG: xAxisG,
+        yAxisG: yAxisG,
+        xScale: xScale,
+        yScale: yScale,
+         xAxis: xAxis,
+         yAxis: yAxis,
+       xColumn: xColumn
+    }
+  }
 
-    var path = g.append('path'),
-        line = d3.svg.line()
-          .x(function (d) {
-            return xScale(d[xColumn] * 1000);
-          })
-          .y(function (d) {
-            return yScale(d[yColumn]);
-          });
+  function render(inputData) {
+
+    // Gets all area names from DATA collection
+    var targetAreas = Object.keys(inputData[0].data);
 
     // NOTE:
     // The domain is in the data space, so its units are your source units.
     // The range is in screen space (pixels).
 
-    // Figuring out max / min values on both Axis
-    xScale.domain( d3.extent(data, function (d){ return d[xColumn] * 1000; }));
-    yScale.domain( d3.extent(data, function (d){ return d[yColumn]; }) );
+    /**
+    // Loop through 'target areas' to generate a graph for each
+    */
+    targetAreas.forEach(function(targetArea)
+    {
+      // Create new Graph for each 'target area'
+      var graph = setupGraph(targetArea);
+      /**
+      // Loop through all the 'service types' to create a line per type
+      */
+      // NOTE: opted for fixed serviceTypes instead of all (automated)
+      var serviceTypes = ['uberX', 'uberXL', 'uberSELECT', 'UberBLACK', 'UberSUV'],   //Object.keys(inputData[0].data[targetArea]),
+          lSpace = graph.graphWidth / serviceTypes.length;  // define the length of legend section
 
-    xAxisG.call(xAxis);
-    yAxisG.call(yAxis);
+      serviceTypes.forEach(function(serviceType, index)
+      {
+        var path = graph.graphG.append('path').attr('label', serviceType),
+            line = d3.svg.line()
+              .x(function (d) {
+                return graph.xScale(d[graph.xColumn] * 1000);
+              })
+              .y(function (d) {
+                return graph.yScale( (d.data[targetArea][serviceType]) ? d.data[targetArea][serviceType] : 1 );
+              });
 
-    path.attr('d', line(data))
-      .attr('stroke', function() { return "hsl(" + Math.random() * 360 + ", 100%, 75%)" })
-      .attr('stroke-width', 3)
-      .attr('fill', 'none')
-      .attr('class', 'dataLine');
+        // Figuring out max / min values on both Axis
+        graph.xScale.domain( d3.extent(inputData, function (d){ return d[graph.xColumn] * 1000; }));
+        graph.yScale.domain( d3.extent(inputData, function (d){
+          var serviceSurge = [];
+
+          for (var prop in d.data[targetArea]){
+            if (d.data[targetArea].hasOwnProperty(prop)){
+              serviceSurge.push(d.data[targetArea][prop]);
+            }
+          }
+          return Math.max.apply(null, serviceSurge);
+        }) );
+
+        path.attr('d', line(inputData))
+          .attr('stroke', function() { return "hsl(" + Math.random() * 360 + ", 100%, 75%)" })
+          .attr('stroke-width', 3)
+          .attr('fill', 'none')
+          .attr('class', 'dataLine');
+
+        // Append history name and data to Graph
+        graph.graphSVG.append('text')
+          .attr('x', (lSpace / 3) + index * lSpace)
+          .attr('y', 20)
+          .attr('fill', path.attr('stroke'))
+          .attr('class', 'legend')
+          .text(serviceType);
+
+      });
+
+      // Append Graph label (target area)
+      graph.graphSVG.append('text')
+        .attr('x', graph.graphWidth / 2)
+        .attr('y', graph.graphHeight - 10)
+        .style("text-anchor", "middle")
+        .attr('class', 'targetArea')
+        .text(targetArea);
+
+      // Draw Axis
+      graph.xAxisG.call(graph.xAxis);
+      graph.yAxisG.call(graph.yAxis);
+
+
+
+    });
+
+    d3.selectAll('.x.axis').selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('dx', '-.8em')
+      .attr('dy', '.15em')
+      .attr('transform', 'rotate(-65)');
+
   }
 
   function clearAll(){
@@ -169,12 +258,13 @@ function setupGraph() {
   }
 }
 
-//function type(d) {
-//  debugger;
-//  d[xColumn]    = new Date(d[xColumn] * 1000);
-//  d[yColumn]    = +d[yColumn];
-//  return d;
-//}
+
+function generateGraphs(){
+  // Initialize graphing module
+  var a = SetupGraph();
+  //var serviceCollection = createServiceCollection(, 'uberX');
+  a.graphRender(denseArray(), 'Downtown');
+}
 
 function denseArray() {
   var groupTime,
@@ -212,6 +302,9 @@ function denseArray() {
   return dense;
 }
 
-
+$('body').on('dataLoaded', function(){
+  var a = GraphData();
+  a.graphRender(DATA);
+});
 
 //render( createServiceCollection(DATA, 'uberX') );

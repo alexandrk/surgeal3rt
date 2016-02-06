@@ -54,30 +54,39 @@ function loadData(liveData){
  * Description: Callback for processing the data, after it is loaded on page
  * @param loadedData {object} - data to be processed
  ****************************************************************************/
-function onDataLoaded(loadedData){
+function onDataLoaded(loadedData) {
 
   // Save a copy of the data to localStorage
   if (localStorage.newSurgeData || localStorage.surgeData === undefined) {
     localStorage.surgeData = JSON.stringify(loadedData);
   }
-  console.log(loadedData.length + ' records loaded. New data loaded: '+ localStorage.newSurgeData);
+  console.log(loadedData.length + ' records loaded. New data loaded: ' + localStorage.newSurgeData);
 
   // Check URL for valid parameters: [serviceArea, serviceType]
   var anchorMap = $.uriAnchor.makeAnchorMap(),
       settingsObj = {
-        dataLength  : loadedData.length,
-        serviceArea : 'Downtown'
+        dataLength: loadedData.length,
+        serviceArea: 'Downtown'
       };
 
+  // Ability to specify serviceType over the query string parameter
+  var qsServiceType = validateServiceType(anchorMap.serviceType);
 
-  if (Object.keys(loadedData[0].data).indexOf(anchorMap.serviceArea) > -1){
-    settingsObj.serviceArea = anchorMap.serviceArea;
+  if (Object.keys(loadedData[0].data[settingsObj.serviceArea]).indexOf(qsServiceType) > -1) {
+    settingsObj.serviceType = qsServiceType;
   }
 
-  /************************
-   * Start of SVG section
-   ************************/
-  var settings = InitializeGraph(settingsObj);
+  // Iterate over service areas and generate a graph for each
+  Object.keys(loadedData[0].data).forEach(function(serviceArea){
+
+    settingsObj.serviceArea = serviceArea;
+    var settings = InitializeGraph(settingsObj);
+
+    drawGraph(loadedData, settings);
+  });
+}
+
+function drawGraph(loadedData, settings){
 
   // Settings up proper scale for x / y axis: {
   //   x - datetime scale (converting timestamp to timestamp in ms)
@@ -94,16 +103,16 @@ function onDataLoaded(loadedData){
   var zoom = d3.behavior.zoom()
     .x(xScale)
     //.y(yScale)
-    //.scaleExtent([1, 10])
+    .scaleExtent([1, 15])
     .on("zoom", zoomed);
 
   // Adding svg element to the page
   var svg = d3.select('body').append('svg')
     .call(zoom)
     .style({
-    width: settings.outerWidth,
-    height: settings.outerHeight
-  });
+      width: settings.outerWidth,
+      height: settings.outerHeight
+    });
 
   // Adding inner frame and axis to the svg
   var g = svg.append('g')
@@ -117,15 +126,15 @@ function onDataLoaded(loadedData){
   var xAxis = d3.svg.axis()
         .scale(xScale)              // xScale is d3.time.scale()
         .orient('bottom')           // draw ticks below the axis
-        //.ticks(24)                 // number of ticks
+      //.ticks(24)                 // number of ticks
 
-      ,yAxis = d3.svg.axis()
+    ,yAxis = d3.svg.axis()
         .scale(yScale)              // yScale is d3.scale.linear()
         .orient('left');
 
-    // Draw Axis
-    xAxisG.call(xAxis);
-    yAxisG.call(yAxis);
+  // Draw Axis
+  xAxisG.call(xAxis);
+  yAxisG.call(yAxis);
 
   doTickTransformation();
 
@@ -134,23 +143,20 @@ function onDataLoaded(loadedData){
       clipPath = svg.append("clipPath")
         .attr("id", clipPathID)
         .append("rect")
-          .attr({
-            width : settings.innerWidth,
-            height: settings.innerHeight
-            //x     : settings.margin.left,
-            //y     : settings.margin.top
-          });
+        .attr({
+          width : settings.innerWidth,
+          height: settings.innerHeight
+        });
 
   // Creating bars for the chart based on data
   var rects = g.selectAll('rect')
-               .append('rect')
-               .data(loadedData);
+    .append('rect')
+    .data(loadedData);
 
   // Setting up bars properties
   rects.enter().append('rect')
-    //.attr("clip-path", )
     .attr({
-     "clip-path": "url(#"+ clipPathID +")",
+      "clip-path": "url(#"+ clipPathID +")",
       x         : function(d, i){ return xScale(d.time * 1000); },
       y         : function(d, i){ return yScale(d.data[settings.serviceArea][settings.serviceType]) },
       width     : settings.gBarWidth,
@@ -159,51 +165,76 @@ function onDataLoaded(loadedData){
       }
     });
 
-  // Append Graph label (target area)
+  // Append Graph label (service area)
   svg.append('text')
     .attr('transform', 'translate('+
-      (settings.outerWidth / 2)
-      +','+
-      (settings.outerHeight - 5) + ')')
+    (settings.outerWidth / 2) +','+
+    (25) + ')')
     .style("text-anchor", "middle")
     .attr('class', 'targetArea')
-    .text(settings.serviceArea);
-
-  function doTickTransformation(){
-    // Ticks transformation
-    d3.selectAll('.x.axis').selectAll('text')
-      .style('text-anchor', 'end')
-      .attr('dx', '-.8em')
-      .attr('dy', '.15em')
-      .attr('transform', 'rotate(-65)');
-  }
+    .text(settings.serviceArea +' - '+ settings.serviceType);
 
   //************************************************************
   // Zoom specific updates
   //************************************************************
-  function zoomed() {
-    svg.select(".x.axis").call(xAxis);
-    svg.select(".y.axis").call(yAxis);
-    console.log('here');
+    function zoomed() {
+      //var svg = $(this);
+      svg.select(".x.axis").call(xAxis);
+      svg.select(".y.axis").call(yAxis);
 
-    g.selectAll('rect', function(d){return d})
-      .attr({
-        x: function (d, i) {
-          return xScale(d.time * 1000);
-        },
-        y: function (d, i) {
-          return yScale(d.data[settings.serviceArea][settings.serviceType])
-        },
-        width: settings.gBarWidth,
-        height: function (d, i) {
-          var result = settings.innerHeight - yScale(d.data[settings.serviceArea][settings.serviceType]);
-          return (result <= 0) ? 0 : result;
-        }
-      });
+      g.selectAll('rect', function(d){return d})
+        .attr({
+          x: function (d, i) {
+            return xScale(d.time * 1000);
+          },
+          y: function (d, i) {
+            return yScale(d.data[settings.serviceArea][settings.serviceType])
+          },
+          width: settings.gBarWidth,
+          height: function (d, i) {
+            var result = settings.innerHeight - yScale(d.data[settings.serviceArea][settings.serviceType]);
+            return (result <= 0) ? 0 : result;
+          }
+        });
 
-    doTickTransformation();
-  }
+      doTickTransformation();
+    }
+}
 
+function doTickTransformation(){
+  // Ticks transformation
+  d3.selectAll('.x.axis').selectAll('text')
+    .style('text-anchor', 'end')
+    .attr('dx', '-.8em')
+    .attr('dy', '.15em')
+    .attr('transform', 'rotate(-65)');
+}
+
+/*------------------------------------| Helper Functions |------------------------------------*/
+
+/************************************
+ * Function: validateServiceType
+ * @param serviceType
+ * @returns {string}
+ ************************************/
+function validateServiceType( serviceType ) {
+  var
+    validTypes = ['uberX', 'uberXL', 'uberWAV', 'uberSELECT', 'UberSUV', 'UberBLACK', 'ASSIST'],
+    index = -1,
+    matchFound;
+
+  // Lowercase the type in question
+  serviceType = ( typeof serviceType === 'string' ) ? serviceType.toLowerCase() : '';
+
+  // Case insensitive match of the provided value vs values approved by Uber API
+  matchFound = validTypes.some( function( element, i ) {
+    if ( element.toLowerCase() === serviceType ) {
+      index = i;
+      serviceType = validTypes[index];
+      return true;
+    }
+  });
+  return ( matchFound ) ? serviceType : validTypes[0];
 }
 
 loadData(true);

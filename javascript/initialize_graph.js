@@ -4,9 +4,11 @@ function InitializeGraph(newSettings){
 
   // INTERNAL SETTINGS OBJECT
   var settings = function(){
-    var margin = { left: 50, top: 35, right: 30, bottom: 70},
-        outerWidth  = Math.max(550, Number.parseInt(window.innerWidth * .8)),
-        outerHeight = Math.max(300, Number.parseInt(window.innerHeight / 2 * .8)),
+    var margin = { left: 30, top: 35, right: 10, bottom: 50},
+        outerWidth  = Math.max(250, Number.parseInt(window.innerWidth * .9)),
+        outerHeight = (window.outerHeight < window.outerWidth)
+                        ? Number.parseInt(window.innerHeight * .9)
+                        : Math.max(280, Number.parseInt(window.innerHeight / 2 * .9)),
         innerWidth  = outerWidth - margin.left - margin.right,
         innerHeight = outerHeight - margin.top - margin.bottom,
         dataLength  = 0,
@@ -39,9 +41,7 @@ function InitializeGraph(newSettings){
   }
 
   settings.gBarPadding = 0;
-  settings.gBarWidth   = ((settings.innerWidth / settings.dataLength - settings.gBarPadding) <= 0)
-                            ? 1
-                            : settings.innerWidth / settings.dataLength - settings.gBarPadding;
+  settings.gBarWidth   = 5;
 
   return settings;
 

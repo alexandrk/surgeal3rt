@@ -10,7 +10,7 @@
    * Description: loads data from the firebase database, triggering
    *              dataloaded event on each new set of data
    */
-  function loadData() {
+  function loadData(TEST_DATA) {
 
     if ( TEST_DATA === true ){
       DATA = JSON.parse(localStorage.surgeData);
@@ -18,15 +18,15 @@
       $('body').trigger('dataLoaded');
     }
     else {
-      var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
-
       // NOTE: timestamp saved in the firebase db is in seconds, so we need to divide ours by 1000
-      // day    - 86400000    -
+      // day    - 86400000    - 86400
       // week   - 604800000   - 13192
       // month  - 18144000000 - 19557
+      var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data"),
+          fromTime = new Date().setHours(0,0,0,0) / 1000, //(new Date((new Date).setHours(0,0,0,0) - 86400000)).getTime() / 1000,
+          toTime = fromTime + 35000;
 
-      var fromTime = new Date().setHours(0,0,0,0) / 1000, //(new Date((new Date).setHours(0,0,0,0) - 86400000)).getTime() / 1000,
-          toTime = fromTime + 86400;
+      $('body').prepend('<div class="loading">Loading...</div>');
 
       ref
         .orderByChild('time')
@@ -35,6 +35,8 @@
         .once("value", function (snapshot) {
           var records = snapshot.val(),
               record;
+
+          $('.loading').remove();
           for (record in records) {
             if (records.hasOwnProperty(record)) {
               DATA.push(records[record]);
@@ -46,8 +48,6 @@
       ;
     }
   }
-
-loadData();
 
 function getServiceTypeSurge( surgeData, serviceType ) {
   var results = {},
@@ -94,12 +94,6 @@ function createServiceCollection( surgeData, serviceType ) {
   return arr;
 }
 
-//  return {
-//    init: loadData,
-//    constructSVG: constructSVG
-//  }
-//}();
-
 function GraphData() {
 
   /******************************************************************************************
@@ -108,9 +102,9 @@ function GraphData() {
    * @returns {{graphSVG: *, xAxisG: *, yAxisG: *, xScale: *, yScale: *, xAxis: *, yAxis: *}}
    *******************************************************************************************/
   function setupGraph(targetArea) {
-    //min width / height: 635 / 380
-    var outerWidth  = Math.max(620, Number.parseInt(window.innerWidth / 2 * .8)),
-        outerHeight = Math.max(330, Number.parseInt(window.innerHeight / 2 * .8)),
+    //min width / height: 550 / 300
+    var outerWidth  = Math.max(550, Number.parseInt(window.innerWidth / 2 * .8)),
+        outerHeight = Math.max(300, Number.parseInt(window.innerHeight / 2 * .8)),
         margin      = {left: 50, top: 35, right: 30, bottom: 70},
         innerWidth  = outerWidth - margin.left - margin.right,
         innerHeight = outerHeight - margin.top - margin.bottom,
@@ -184,8 +178,11 @@ function GraphData() {
       // Loop through all the 'service types' to create a line per type
       */
       // NOTE: opted for fixed serviceTypes instead of all (automated)
-      var serviceTypes = ['uberX', 'uberXL', 'uberSELECT', 'UberBLACK', 'UberSUV'],   //Object.keys(inputData[0].data[targetArea]),
-          lSpace = graph.graphWidth / serviceTypes.length,  // define the length of legend section
+      // d3.keys(DATA[0].data['Downtown']).filter(function(key){ return key != 'ASSIST' && key != 'uberTAXI' && key != 'uberWAV' }));
+      // or with Object.keys(inputData[0].data[targetArea]),
+      var serviceTypes = ['uberX', 'uberXL', 'uberSELECT', 'UberBLACK', 'UberSUV'],
+          lSpace = graph.graphWidth / serviceTypes.length,  // define the length of legend section space
+          legendSpace = [60, 140, 220, 340, 460],
           colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf'];
 
       serviceTypes.forEach(function(serviceType, index)
@@ -222,7 +219,7 @@ function GraphData() {
 
         // Append history name and data to Graph
         graph.graphSVG.append('text')
-          .attr('x', (lSpace / 3) + index * lSpace)
+          .attr('x', legendSpace.shift())
           .attr('y', 20)
           .attr('fill', path.attr('stroke'))
           .attr('class', 'legend')
@@ -324,5 +321,7 @@ $('body').on('dataLoaded', function(){
   var a = GraphData();
   a.graphRender(denseArray());
 });
+
+loadData();
 
 //render( createServiceCollection(DATA, 'uberX') );

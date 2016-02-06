@@ -73,6 +73,10 @@ body {
   font: 12px sans-serif;
 }
 
+.axis .tick text {
+  font: 10px sans-serif;
+}
+
 .axis path,
 .axis line {
   fill: none;

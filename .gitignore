@@ -1,3 +1,8 @@
 .idea/
 service/live/
 Gemfile.lock
+
+javascript/dist/
+
+node_modules/
+npm-debug.log

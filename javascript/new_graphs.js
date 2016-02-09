@@ -1,12 +1,12 @@
 'use strict';
 
-const TIME_TIMESTAMPS = {
+var TIME_TIMESTAMPS = {
   today     : +new Date().setHours(0,0,0,0),
   msInDay   : 86400000,
   updateThreshold: 600000
 };
 
-const DATE_FORMAT = d3.time.format('%b %d, %Y');
+var DATE_FORMAT = d3.time.format('%b %d, %Y');
 
 /********************************************************************************************
  * * Function:    loadData
@@ -27,7 +27,7 @@ function loadData(settings){
   // Check settings.fromTime for presence and validity (being in range)
   // If settings.fromTime is not specified, set to today's date, 12:00am
   var dateRange     = [+new Date('01/01/1999'), +new Date().setYear(new Date().getFullYear() + 1)];
-  settings.fromTime = Number.parseInt(settings.fromTime);
+  settings.fromTime = parseInt(settings.fromTime);
   if (
     (Math.max(dateRange[0], settings.fromTime) === settings.fromTime) &&
     (Math.max(dateRange[1], settings.fromTime) === dateRange[1])
@@ -56,7 +56,7 @@ function loadData(settings){
       // Get the timestamp of the last record from the localStorage.surgeData
       // and add records that come after it
       data = JSON.parse(localStorage.surgeData);
-      timeOfLastStoredItem = Number.parseInt(data[data.length - 1].time) * 1000;
+      timeOfLastStoredItem = parseInt(data[data.length - 1].time) * 1000;
 
 
       // If settings.fromTime is with a range of today
@@ -84,7 +84,7 @@ function loadData(settings){
 
         // verify if 10 minutes passed since the last request
         if (dateDifference > TIME_TIMESTAMPS.updateThreshold) {
-            loadDataConfigObj.fromTime = Number.parseInt(timeOfLastStoredItem / 1000);
+            loadDataConfigObj.fromTime = parseInt(timeOfLastStoredItem / 1000);
             localStorage.surgeDataType = 'update';
             FI.loadData(loadDataConfigObj, onDataLoaded);
         }
@@ -187,7 +187,7 @@ function onDataLoaded(loadedData) {
 function drawGraph(loadedData, settings){
 
   // Setting a date for the graph (to be display on the graph for readability purposes)
-  settings.forDate = DATE_FORMAT(new Date(Number.parseInt(loadedData[0].time) * 1000));
+  settings.forDate = DATE_FORMAT(new Date(parseInt(loadedData[0].time) * 1000));
 
   // Settings up proper scale for x / y axis: {
   //   x - datetime scale (converting timestamp to timestamp in ms)
@@ -353,7 +353,7 @@ function setAlert(message, delay){
 /*--------------------------| Event Handlers |---------------------------*/
 $(function(){
   $( "#DateOfInterest" ).datepicker({
-    minDate: new Date(2015,12, 18),
+    minDate: new Date(2015,11,18),
     maxDate: new Date(),
     dateFormat: 'mm/dd/yy'
   });
@@ -363,7 +363,7 @@ $(function(){
 
   $('#DateOfInterest').datepicker('setDate', defaultDate);
 
-  $('#DateOfInterest').on('change', function(val){
+  $('#DateOfInterest').on('blur', function(val){
     var startDate = new Date($('#DateOfInterest').val()).setHours(0,0,0,0);
     loadData({fromTime: startDate, liveData: true});
     sessionStorage.setItem('DateOfInterest', $('#DateOfInterest').val());

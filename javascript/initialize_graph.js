@@ -5,10 +5,10 @@ function InitializeGraph(newSettings){
   // INTERNAL SETTINGS OBJECT
   var settings = function(){
     var margin = { left: 30, top: 35, right: 10, bottom: 50},
-        outerWidth  = Math.max(250, Number.parseInt(window.innerWidth * .9)),
+        outerWidth  = Math.max(250, parseInt(window.innerWidth * .9)),
         outerHeight = (window.outerHeight < window.outerWidth)
-                        ? Number.parseInt(window.innerHeight * .9)
-                        : Math.max(280, Number.parseInt(window.innerHeight / 2 * .9)),
+                        ? parseInt(window.innerHeight * .9)
+                        : Math.max(280, parseInt(window.innerHeight / 2 * .9)),
         innerWidth  = outerWidth - margin.left - margin.right,
         innerHeight = outerHeight - margin.top - margin.bottom,
         dataLength  = 0,

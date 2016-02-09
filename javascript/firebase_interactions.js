@@ -5,7 +5,9 @@ var FI = (function firebase_interactions(){
    * Description: loads data from the firebase database, triggering
    *              dataloaded event on each new set of data
    * @param configObj - {
-   *  spinnerDivID: //id of the element used for the spinner (while data is loading from the server)
+   *  spinnerDivID: //id of the element used for the spinner (while data is loading from the server),
+   *  fromTime {Number} - timestamp in ms for the beginning of the dataset,
+   *  toTime {Number} - timestamp in ms for the end of the dataset
    * }
    * @param callback  // function to be executed, when data is finished loading
    */
@@ -14,21 +16,26 @@ var FI = (function firebase_interactions(){
     var allData = [];
 
     // NOTE: timestamp saved in the firebase db is in seconds, so we need to divide ours by 1000
-    // day    - 86400000    - 86400
-    // week   - 604800000   - 13192
-    // month  - 18144000000 - 19557
-    var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data"),
-        fromTime = new Date().setHours(0,0,0,0) / 1000, //(new Date((new Date).setHours(0,0,0,0) - 86400000)).getTime() / 1000,
-        toTime = fromTime + 86400;
+    var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
+
+    // Setting fromTime to beginning of current day, if undefined
+    if (configObj.fromTime === undefined ){
+      configObj.fromTime = new Date().setHours(0,0,0,0) / 1000
+    }
+
+    // default to a day worth of data
+    if (configObj.toTime === undefined ){
+      configObj.toTime = configObj.fromTime + 86400;
+    }
 
     // Add preloader / spinner
     if (configObj.spinnerDivID) {
-      $('body').prepend('<div id="'+ configObj.spinnerDivID +'">Loading...</div>');
+      $('body').append('<div id="'+ configObj.spinnerDivID +'">Loading...</div>');
     }
     ref
       .orderByChild('time')
-      .startAt(fromTime)
-      .endAt(toTime)
+      .startAt(configObj.fromTime)
+      .endAt(configObj.toTime)
       .once("value", function (snapshot) {
         var records = snapshot.val(),
             record;
@@ -55,3 +62,5 @@ var FI = (function firebase_interactions(){
   };
 
 })();
+
+//TODO: Move timestamp conversion from ms to s from all the js files into firebase_interactions.js

@@ -92,6 +92,10 @@ svg {
   margin: 10px 5px 0 5px;
 }
 
+svg:first-of-type{
+  margin-top: 20px;
+}
+
 .legend {
   font-size: 17px;
   font-weight: bold;
@@ -119,6 +123,10 @@ text.targetArea {
   font-size: 14px;
 }
 
+#loading-data {
+  margin-top: 100px;
+}
+
 .message {
   cursor: pointer;
   display: none;
@@ -126,7 +134,9 @@ text.targetArea {
   top: 0;
   left: 0;
   width: 100%;
+  font-size: 15px;
   background: coral;
   color: #420304;
-  padding: 7px 10px;
+  padding: 10px 10px;
+  text-align: center;
 }

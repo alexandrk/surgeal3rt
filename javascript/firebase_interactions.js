@@ -30,6 +30,7 @@ var FI = (function firebase_interactions(){
 
     // Add preloader / spinner
     if (configObj.spinnerDivID) {
+      d3.selectAll('svg').remove();
       $('body').append('<div id="'+ configObj.spinnerDivID +'">Loading...</div>');
     }
     ref

@@ -48,7 +48,7 @@ function loadData(settings){
       if (localStorage.surgeData === undefined || localStorage.surgeData.length < 20)
       {
         localStorage.surgeDataType = 'new';
-        setAlert('Getting new data for: '+ DATE_FORMAT(new Date(loadDataConfigObj.fromTime * 1000)));
+        setAlert('Getting new data for: '+ DATE_FORMAT(new Date(loadDataConfigObj.fromTime * 1000)), 2000);
         FI.loadData(loadDataConfigObj, onDataLoaded);
         return;
       }
@@ -63,7 +63,7 @@ function loadData(settings){
       // Or time difference between last item in localStorage and requested date is more than a day
       if ( loadDataConfigObj.fromTime * 1000 < loadDataConfigObj.fromTime * 1000
         || Math.abs(timeOfLastStoredItem - loadDataConfigObj.fromTime * 1000) > TIME_TIMESTAMPS.msInDay ){
-        setAlert('Getting new data for: '+ DATE_FORMAT(new Date(loadDataConfigObj.fromTime * 1000)));
+        setAlert('Getting new data for: '+ DATE_FORMAT(new Date(loadDataConfigObj.fromTime * 1000)), 2000);
         localStorage.surgeDataType = 'new';
         FI.loadData(loadDataConfigObj, onDataLoaded);
       }
@@ -91,7 +91,7 @@ function loadData(settings){
         // If dateDifference is less than 10 minutes, show cached data
         else {
           setAlert('YOU CAN UPDATE TO NEW DATA IN: ' +
-            Math.round((TIME_TIMESTAMPS.updateThreshold - dateDifference) / 1000 / 60) + ' minutes.');
+            Math.ceil((TIME_TIMESTAMPS.updateThreshold - dateDifference) / 1000 / 60) + ' minutes', 4000);
           localStorage.surgeDataType = 'cached';
           onDataLoaded(data);
         }
@@ -126,12 +126,12 @@ function onDataLoaded(loadedData) {
 
   var currentData = loadedData;
 
-  // Remove old graphs, if any are present
-  d3.selectAll('svg').remove();
+  //// Remove old graphs, if any are present
+  //d3.selectAll('svg').remove();
 
   // If no data, display a message and exit
   if(loadedData.length === 0){
-    setAlert('No data found for the specified date.</br>Please select another one.');
+    setAlert('NO DATA FOUND FOR THE SPECIFED DATE.<br />PLEASE SELECT ANOTHER DATE');
     return;
   }
 
@@ -149,9 +149,16 @@ function onDataLoaded(loadedData) {
     loadedData = [];
   }
 
-  setAlert(currentData.length + ' records present. ' +
-              'Data Type: ' + localStorage.surgeDataType.toUpperCase() + '. ' +
-              'New Records: '+ loadedData.length +'.');
+  if (window.innerWidth < 400){
+    setAlert(currentData.length + ' RECORDS PRESENT<br />' +
+      'DATA TYPE: ' + localStorage.surgeDataType.toUpperCase() + '<br />' +
+      'NEW RECORDS: '+ loadedData.length, 2000);
+  }
+  else{
+    setAlert(currentData.length + ' RECORDS PRESENT; ' +
+      'DATA TYPE: ' + localStorage.surgeDataType.toUpperCase() + '; ' +
+      'NEW RECORDS: '+ loadedData.length, 2000);
+  }
 
   // Check URL for valid parameters: [serviceArea, serviceType]
   var anchorMap = $.uriAnchor.makeAnchorMap(),
@@ -332,9 +339,15 @@ function validateServiceType( serviceType ) {
   return ( matchFound ) ? serviceType : validTypes[0];
 }
 
-function setAlert(message){
+function setAlert(message, delay){
   var alert = $('<div class="message">').html(message);
-  alert.appendTo($('body')).slideDown('slow');
+
+  if (delay > 0){
+    alert.appendTo($('body')).slideDown('slow').delay(delay).slideUp('slow');
+  }
+  else {
+    alert.appendTo($('body')).slideDown('slow');
+  }
 }
 
 /*--------------------------| Event Handlers |---------------------------*/
@@ -346,7 +359,7 @@ $(function(){
   });
 
   var sessionValue = sessionStorage.getItem('DateOfInterest'),
-      defaultDate = (sessionValue) ? new Date(sessionValue) : new Date();
+      defaultDate = (sessionValue) ? new Date(sessionValue) : new Date().setHours(0,0,0,0);
 
   $('#DateOfInterest').datepicker('setDate', defaultDate);
 

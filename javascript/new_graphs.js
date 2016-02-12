@@ -72,7 +72,7 @@ function loadData(settings){
         // Do not refresh data, use cached values, if selected date
         // is same as in the localStorage and is different from today
         if (Math.abs(loadDataConfigObj.fromTime * 1000 - TIME_TIMESTAMPS.today) > TIME_TIMESTAMPS.msInDay){
-          setAlert('PICK A DIFFERENT DATE TO SEE NEW DATA');
+          setAlert('PICK A DIFFERENT DATE TO SEE NEW DATA', 4000);
           localStorage.surgeDataType = 'cached';
           onDataLoaded(data);
           return;
@@ -90,7 +90,7 @@ function loadData(settings){
         }
         // If dateDifference is less than 10 minutes, show cached data
         else {
-          setAlert('YOU CAN UPDATE TO NEW DATA IN: ' +
+          setAlert('UPDATE TO NEW DATA IN: ' +
             Math.ceil((TIME_TIMESTAMPS.updateThreshold - dateDifference) / 1000 / 60) + ' minutes', 4000);
           localStorage.surgeDataType = 'cached';
           onDataLoaded(data);
@@ -127,7 +127,7 @@ function onDataLoaded(loadedData) {
   var currentData = loadedData;
 
   //// Remove old graphs, if any are present
-  //d3.selectAll('svg').remove();
+  d3.selectAll('svg').remove();
 
   // If no data, display a message and exit
   if(loadedData.length === 0){
@@ -150,9 +150,9 @@ function onDataLoaded(loadedData) {
   }
 
   if (window.innerWidth < 400){
-    setAlert(currentData.length + ' RECORDS PRESENT<br />' +
-      'DATA TYPE: ' + localStorage.surgeDataType.toUpperCase() + '<br />' +
-      'NEW RECORDS: '+ loadedData.length, 2000);
+    setAlert(currentData.length + ' RECORDS; ' +
+      'TYPE: ' + localStorage.surgeDataType.toUpperCase() + '; ' +
+      'NEW: '+ loadedData.length, 2000);
   }
   else{
     setAlert(currentData.length + ' RECORDS PRESENT; ' +
@@ -186,6 +186,8 @@ function onDataLoaded(loadedData) {
 
 function drawGraph(loadedData, settings){
 
+  //loadedData = loadedData.slice(loadedData.length * 0.6);
+
   // Setting a date for the graph (to be display on the graph for readability purposes)
   settings.forDate = DATE_FORMAT(new Date(parseInt(loadedData[0].time) * 1000));
 
@@ -209,16 +211,40 @@ function drawGraph(loadedData, settings){
 
   // Adding svg element to the page
   var svg = d3.select('body').append('svg')
-    .call(zoom)
     .style({
       width: settings.outerWidth,
       height: settings.outerHeight
     });
 
-  // Adding inner frame and axis to the svg
   var g = svg.append('g')
-        .attr('transform', 'translate(' + settings.margin.left + ',' + settings.margin.top + ')'),
-      xAxisG = g.append('g')
+        .attr('transform', 'translate(' + settings.margin.left + ',' + settings.margin.top + ')');
+
+  // Required for graph to not go out-of-bound, when zooming
+  var clipPathID = "clip"+ settings.serviceType,
+      plotArea = g.append("g").attr({
+        'clip-path': 'url(#'+ clipPathID +')'
+      });
+
+  plotArea
+    .append('clipPath')
+      .attr("id", clipPathID)
+      .append("rect")
+        .attr({
+          width : settings.innerWidth,
+          height: settings.innerHeight
+        });
+
+  plotArea.append('rect')
+    .attr({
+      class: 'zoom-pane',
+      width : settings.innerWidth,
+      height: settings.innerHeight,
+      fill: '#e1ceb1'
+    })
+    .call(zoom);
+
+  // Adding inner frame and axis to the svg
+  var xAxisG = g.append('g')
         .attr('transform', 'translate(0, ' + settings.innerHeight + ')')
         .attr('class', 'x axis'),
       yAxisG = g.append('g')
@@ -228,10 +254,14 @@ function drawGraph(loadedData, settings){
         .scale(xScale)              // xScale is d3.time.scale()
         .orient('bottom')           // draw ticks below the axis
       //.ticks(24)                 // number of ticks
+        .innerTickSize(-settings.innerHeight)
+        .outerTickSize(0)
 
     ,yAxis = d3.svg.axis()
         .scale(yScale)              // yScale is d3.scale.linear()
-        .orient('left');
+        .orient('left')
+        .innerTickSize(-settings.innerWidth)
+        .outerTickSize(0);
 
   // Draw Axis
   xAxisG.call(xAxis);
@@ -239,25 +269,18 @@ function drawGraph(loadedData, settings){
 
   doTickTransformation();
 
-  // Required for graph to not go out-of-bound, when zooming
-  var clipPathID = "clip"+ settings.serviceType,
-      clipPath = svg.append("clipPath")
-        .attr("id", clipPathID)
-        .append("rect")
-        .attr({
-          width : settings.innerWidth,
-          height: settings.innerHeight
-        });
 
   // Creating bars for the chart based on data
-  var rects = g.selectAll('rect')
+  var wrapper = plotArea.append('g').attr({
+    class: 'barChartWrapper'
+  });
+  var rects = wrapper.selectAll('rect')
     .append('rect')
     .data(loadedData);
 
   // Setting up bars properties
   rects.enter().append('rect')
     .attr({
-      "clip-path": "url(#"+ clipPathID +")",
       x         : function(d, i){ return xScale(d.time * 1000); },
       y         : function(d, i){ return yScale(d.data[settings.serviceArea][settings.serviceType]) },
       width     : settings.gBarWidth,
@@ -279,11 +302,27 @@ function drawGraph(loadedData, settings){
   // Zoom specific updates
   //************************************************************
     function zoomed() {
-      //var svg = $(this);
-      svg.select(".x.axis").call(xAxis);
-      svg.select(".y.axis").call(yAxis);
+      var svg = d3.select(this.closest('svg'));
 
-      g.selectAll('rect', function(d){return d})
+      var filteredData  = [],
+          domain        = xScale.domain();
+
+      for (var i = 0; i < loadedData.length; i += 1) {
+        var dataTime = (+loadedData[i].time * 1000);
+        if ((+domain[0] <= dataTime) && (dataTime <= +domain[1])) {
+          filteredData.push(loadedData[i]);
+        }
+      }
+      console.log('loaded data: '+ loadedData.length +'; filtered data: '+ filteredData.length);
+
+      yScale.domain(d3.extent(filteredData, function(d){ return d.data[settings.serviceArea][settings.serviceType] }));
+
+      //svg.select(".x.axis").call(xAxis);
+      ////svg.select(".y.axis").call(yAxis);
+      //
+      //svg.select('.barChartWrapper').attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ', 1)');
+
+      svg.select('.barChartWrapper').selectAll('rect', function(d){return d})
         .attr({
           x: function (d, i) {
             return xScale(d.time * 1000);
@@ -297,6 +336,9 @@ function drawGraph(loadedData, settings){
             return (result <= 0) ? 0 : result;
           }
         });
+
+      svg.select(".x.axis").call(xAxis);
+      svg.select(".y.axis").call(yAxis);
 
       doTickTransformation();
     }
@@ -381,15 +423,55 @@ $(function(){
   function datePickerCallback(val){
     var startDate = new Date($('#DateOfInterest').val()).setHours(0,0,0,0);
     if (startDate !== new Date(sessionStorage.getItem('DateOfInterest')).setHours(0,0,0,0)){
-      loadData({fromTime: startDate, liveData: true});
+      // save new date to the session variable
       sessionStorage.setItem('DateOfInterest', $('#DateOfInterest').val());
+      // load data for date selected
+      loadData({fromTime: startDate, liveData: true});
     }
+  }
+
+  if ( mobileAndTabletcheck() ) {
+    $('body').append('<div id="scrollHelper">' +
+      '<div class="wrapper">' +
+        '<div class="letter">S</div>'+
+        '<div class="letter">C</div>'+
+        '<div class="letter">R</div>'+
+        '<div class="letter">O</div>'+
+        '<div class="letter">L</div>'+
+        '<div class="letter">L</div>'+
+        '<div class="letter">&nbsp;</div>'+
+        '<div class="letter">H</div>'+
+        '<div class="letter">E</div>'+
+        '<div class="letter">R</div>'+
+        '<div class="letter">E</div>'+
+      '</div>'+
+    '</div>')
   }
 
   $('body').on('click', '.message', function(){
     $(this).slideUp('slow', function(el){
       $(this).remove();
     });
+  });
+
+  // Used in onResize handler to prevent data reloading on minor
+  // window dimensions changes (e.g. browser navigation bar show/hide)
+  var previousWidth   = $(window).width();
+
+  /***************************************************
+   * Function: onResize Handler
+   * Description: redraws graphs on window resize
+   ***************************************************/
+  $(window).on('resize', function(){
+      var currentWidth  = $(window).width(),
+          sessionValue = sessionStorage.getItem('DateOfInterest'),
+          defaultDate = (sessionValue) ? new Date(sessionValue) : new Date().setHours(0,0,0,0);
+
+    if ( (Math.max(currentWidth, previousWidth) / Math.min(currentWidth, previousWidth)) > 1.3) {
+      loadData({liveData: true, fromTime: +defaultDate});
+      previousWidth = currentWidth;
+    }
+
   });
 
   loadData({liveData: true, fromTime: +defaultDate});

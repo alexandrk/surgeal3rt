@@ -1,8 +1,9 @@
 body {
-  font-family: fantasy, "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 17px;
-  font-weight: bold;
+  font-weight: 500;
   text-align: center;
+  background: #e1ceb1;
 }
 
 .unprepedData {
@@ -79,6 +80,10 @@ body {
   font: 10px sans-serif;
 }
 
+.axis .tick line {
+  opacity: 0.2;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -89,7 +94,7 @@ body {
 
 svg {
   border: 1px solid black;
-  margin: 10px 5px 0 5px;
+  margin: 10px 50px 0 5px;
 }
 
 svg:first-of-type{
@@ -103,7 +108,7 @@ svg:first-of-type{
 
 text.targetArea {
   font-size: 16px;
-  font-weight: bold;
+  /*font-weight: bold;*/
 }
 
 #DateOfInterest {
@@ -113,10 +118,11 @@ text.targetArea {
   border: none;
   border-bottom: 1px solid black;
   text-align: center;
+  background-color: #e1ceb1;
 }
 
 #DateOfInterest:hover {
-  background: rgba(255,0, 0,0.2);
+  background-color: #ddb0a0;
 }
 
 #ui-datepicker-div {
@@ -134,9 +140,30 @@ text.targetArea {
   top: 0;
   left: 0;
   width: 100%;
-  font-size: 15px;
-  background: coral;
-  color: #420304;
+  font-size: 14px;
+  background: rgb(234, 128, 128);
+  color: #ffffff;
   padding: 10px 10px;
   text-align: center;
+}
+
+#scrollHelper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 45px;
+  height: 100%;
+  background: #ddb0a0;
+}
+
+#scrollHelper .wrapper {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 20px;
+}
+
+#scrollHelper .letter {
+  transform: rotate(90deg);
+  color: #ffffff;
 }

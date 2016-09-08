@@ -42,12 +42,10 @@ body {
 
 .row .serviceType {
   float: left;
-  margin-left: 15%;
 }
 
 .row .time {
   float: right;
-  margin-right: 10%;
 }
 
 .controls {
@@ -87,6 +85,14 @@ body {
     padding: 0;
     font-weight: bold;
     font-size: 16px;
+  }
+
+  .row .serviceType {
+    margin-left: 15%;
+  }
+
+  .row .time {
+    margin-right: 10%;
   }
 
   .row .neighbourhood {

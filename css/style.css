@@ -1,6 +1,6 @@
 body {
   font-family: 'Montserrat', sans-serif;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 500;
   text-align: center;
   background: #e1ceb1;
@@ -22,30 +22,22 @@ body {
 }
 
 .row {
+  font: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
   clear: both;
   display: block;
   overflow: auto;
 }
 
 .header {
+  font-family: monospace;
   border-bottom: 1px solid black;
   padding-bottom: 8px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .row > div {
   float: left;
-}
-
-.row .neighbourhood, .row .surge {
-  width: 45%;
-}
-
-.row .neighbourhood {
-  text-align: right;
-}
-
-.row .surge {
-  text-align: center;
 }
 
 .row .serviceType {
@@ -61,17 +53,53 @@ body {
 .controls {
   text-align: center;
 }
-.controls button {
-  width: 16vw;
-  height: 6vw;
-  border-radius: 2vw;
-  background-color: white;
-  border-color: crimson;
-  padding: 0;
-  font-weight: bold;
-  font-size: 2vw;
+
+@media (max-width: 600px) {
+  .controls button {
+    width: 18vw;
+    height: 8vw;
+    border-radius: 2vw;
+    background-color: white;
+    border-color: #9e9c9b;
+    padding: 0;
+    font-weight: bold;
+    font-size: 3.5vw;
+  }
+
+  .row .neighbourhood {
+    text-align: right;
+    width: 65%;
+  }
+
+  .row .surge {
+    text-align: center;
+    width: 35%;
+  }
 }
 
+@media (min-width: 600px) {
+  .controls button {
+    width: 100px;
+    height: 35px;
+    border-radius: 10px;
+    background-color: white;
+    border-color: #9e9c9b;
+    padding: 0;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .row .neighbourhood {
+    text-align: right;
+    width: 50%;
+  }
+
+  .row .surge {
+    text-align: center;
+    width: 50%;
+  }
+
+}
 .axis text {
   font: 12px sans-serif;
 }

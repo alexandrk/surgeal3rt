@@ -37,6 +37,13 @@ var app = function() {
       serviceType = validateServiceType(ANCHOR_MAP['type']),
       surgeData;
 
+    // Update serviceType to comply with new Uber API specs
+    if (dataset.time >= 1473292800) {
+      if (['uberSELECT', 'UberSUV', 'UberBLACK'].indexOf(serviceType) > -1){
+        serviceType = serviceType.replace(/uber/gi, "");
+      }
+    }
+
     surgeData = getServiceTypeSurge(dataset.data, serviceType);
     formatAndOutput(dataset.time, surgeData, serviceType);
   }
@@ -50,7 +57,7 @@ var app = function() {
    */
   function validateServiceType( serviceType ) {
     var
-      validTypes = ['uberX', 'uberXL', 'uberWAV', 'uberSELECT', 'UberSUV', 'UberBLACK', 'ASSIST'],
+      validTypes = ['uberX', 'uberXL', 'uberWAV', 'uberSELECT', 'UberSUV', 'UberBLACK', 'ASSIST', 'SELECT', 'SUV', 'BLACK'],
       index = -1,
       matchFound;
 
@@ -78,6 +85,7 @@ var app = function() {
   function getServiceTypeSurge( surgeData, serviceType ) {
     var results = {},
         loc;
+
 
     for ( loc in surgeData ) {
       results[loc] = surgeData[loc][serviceType];

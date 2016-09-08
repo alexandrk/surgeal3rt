@@ -110,15 +110,44 @@ var app = function() {
 
     newSet.hide();
 
+    // Generating a sorted array of values (based on surge price)
+    var arrOfValues = [{location: "------------------------------------------------------------", surge: 1}];
+    for (loc in values){
+      var
+          surge = parseFloat(values[loc]),
+          obj = {location: loc, surge: surge};
+
+      if (surge > 1){
+        // insert new value to the front of the array, since
+        // it's surge is greater than that of the first element of the array
+        if (surge >= arrOfValues[0].surge){
+          arrOfValues.unshift(obj);
+        }
+        else {
+          // go from second element to end of array to see where the item with given surge belongs
+          for (var i = 1; i < arrOfValues.length; i++) {
+            if (surge >= arrOfValues[i].surge) {
+              arrOfValues.splice(i, 0, obj);
+              break;
+            }
+          }
+        }
+      }
+      else {
+        // if surge is 1 add to the end of array (standard behaviour)
+        arrOfValues.push(obj);
+      }
+    }
+
     // iterate over neighbourhood in a set to display the surge
-    for (val in values) {
+    arrOfValues.forEach(function(el, index){
       newSet.append(
         "<div class='row'>" +
-          "<div class='neighbourhood'>" + val + "</div>" +
-          "<div class='surge'>" + values[val] + "</div>" +
+          "<div class='neighbourhood'>" + el.location + "</div>" +
+          "<div class='surge'>" + el.surge + "</div>" +
         "</div>"
       );
-    }
+    });
 
     newSet.prepend(
       "<div class='row header'>" +

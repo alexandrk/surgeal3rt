@@ -111,7 +111,7 @@ var app = function() {
     newSet.hide();
 
     // Generating a sorted array of values (based on surge price)
-    var arrOfValues = [{location: "------------------------------------------------------------", surge: 1}];
+    var arrOfValues = [{location: "----------------------------------------", surge: 1}];
     for (loc in values){
       var
           surge = parseFloat(values[loc]),

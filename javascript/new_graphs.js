@@ -170,7 +170,10 @@ function onDataLoaded(loadedData) {
   // Ability to specify serviceType over the query string parameter
   var qsServiceType = validateServiceType(anchorMap.serviceType);
 
-  if (Object.keys(currentData[0].data[settingsObj.serviceArea]).indexOf(qsServiceType) > -1) {
+  if (
+    currentData[0].data[settingsObj.serviceArea] &&
+    Object.keys(currentData[0].data[settingsObj.serviceArea]).indexOf(qsServiceType) > -1
+  ) {
     settingsObj.serviceType = qsServiceType;
   }
 
@@ -474,6 +477,14 @@ $(function(){
 
   });
 
-  loadData({liveData: true, fromTime: +defaultDate});
+  //var ref = new Firebase("https://surgeal3rt.firebaseio.com");
+  //ref.authWithOAuthRedirect("facebook", function(error, authData) {
+  //  if (error) {
+  //    console.log("Login Failed!", error);
+  //  } else {
+  //    console.log("Authenticated successfully with payload:", authData);
+      loadData({liveData: false, fromTime: +defaultDate});
+  //  }
+  //});
 });
 

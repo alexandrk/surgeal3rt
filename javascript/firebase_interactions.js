@@ -16,7 +16,8 @@ var FI = (function firebase_interactions(){
     var allData = [];
 
     // NOTE: timestamp saved in the firebase db is in seconds, so we need to divide ours by 1000
-    var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
+    //var ref = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data");
+    var ref = new Firebase("https://surgeal3rtp2.firebaseio.com/uber_surge_data");    
 
     // Setting fromTime to beginning of current day, if undefined
     if (configObj.fromTime === undefined ){

@@ -170,6 +170,11 @@ function onDataLoaded(loadedData) {
   // Ability to specify serviceType over the query string parameter
   var qsServiceType = validateServiceType(anchorMap.serviceType);
 
+  // Update the default service type to match the new return value from Uber API (since June 6th, 2018)
+  if (currentData && currentData[0].time > 1528311600) {
+   settingsObj.serviceType = "UberX" 
+  }
+  
   if (
     currentData[0].data[settingsObj.serviceArea] &&
     Object.keys(currentData[0].data[settingsObj.serviceArea]).indexOf(qsServiceType) > -1

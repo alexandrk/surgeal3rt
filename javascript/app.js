@@ -59,7 +59,7 @@ var app = function() {
    */
   function validateServiceType( serviceType ) {
     var
-      validTypes = ['uberX', 'uberXL', 'uberWAV', 'uberSELECT', 'UberSUV', 'UberBLACK', 'ASSIST', 'SELECT', 'SUV', 'BLACK'],
+      validTypes = ['UberX', 'UberXL', 'WAV', 'Select', 'Black SUV', 'Black', 'Assist'],
       index = -1,
       matchFound;
 

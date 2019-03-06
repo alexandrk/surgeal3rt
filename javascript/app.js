@@ -1,8 +1,7 @@
+var DATA = [];
 var app = function() {
 
-  var
-    DATA = [],
-    ANCHOR_MAP    = $.uriAnchor.makeAnchorMap();
+  var ANCHOR_MAP    = $.uriAnchor.makeAnchorMap();
 
   /**
    * Name:        loadData
@@ -10,16 +9,18 @@ var app = function() {
    *              dataloaded event on each new set of data
    */
   function loadData () {
-    var
-      //ref   = new Firebase("https://surgeal3rt.firebaseio.com/uber_surge_data"),
-      //ref   = new Firebase("https://surgeal3rtp2.firebaseio.com/uber_surge_data"),
-      //ref   = new Firebase("https://surgeal3rtp3.firebaseio.com/uber_surge_data"),
-        ref   = new Firebase("https://surgeal3rt4.firebaseio.com/uber_surge_data"),
+    var 
       limit = ( parseInt(ANCHOR_MAP['limit']) > 0 ) ? parseInt(ANCHOR_MAP['limit']) : 25,
+      firebaseSurgeData = firebase.database()
+        .ref('uber_surge_data')
+        //.orderByChild('time')     // Really slow (relaying on hash keys instead at the moment as the temp solution)
+        .limitToLast(limit),
       dataset;
 
-    ref.orderByChild('time').limitToLast(limit).on("child_added", function(snapshot)
-    {
+    firebaseSurgeData.on('value', function(snapshot) {
+    
+      //$('#statusConsole').html("");
+      //$('#statusConsole').append("<div>Received new data from firebase.</div>");
       // Save Global lastElement for later use
       dataset = snapshot.val();
 
@@ -27,6 +28,7 @@ var app = function() {
       DATA.push(dataset);
 
       processData(dataset);
+
     });
   }
 
@@ -36,6 +38,9 @@ var app = function() {
    *                as a result of a new set coming from firebase)
    */
   function processData(dataset) {
+
+    //$('#statusConsole').append("<div>Processing data.</div>");
+
     var
       serviceType = validateServiceType(ANCHOR_MAP['type']),
       surgeData;
@@ -47,8 +52,10 @@ var app = function() {
       }
     }
 
-    surgeData = getServiceTypeSurge(dataset.data, serviceType);
-    formatAndOutput(dataset.time, surgeData, serviceType);
+    for (key in dataset) {
+      surgeData = getServiceTypeSurge(dataset[key].data, serviceType);
+      formatAndOutput(dataset[key].time, surgeData, serviceType);
+    }
   }
 
   /**
@@ -105,6 +112,9 @@ var app = function() {
    * @param serviceType {string} - service type of the current set
    */
   function formatAndOutput( time, values, serviceType ) {
+    
+    //$('#statusConsole').append("<div>Formatting Output.</div>");
+
     var
       newSet = $('<div class="aSet">'),
       timeObj = ( new Date(parseInt( time ) * 1000) ),
@@ -159,8 +169,7 @@ var app = function() {
       "</div>"
     );
 
-    //$('.data').prepend(newSet);
-    newSet.prependTo('.data').show('slow');
+    newSet.prependTo('.data').show();
   }
 
   function onHashchange( event ) {

@@ -1,7 +1,7 @@
-var DATA = [];
 var app = function() {
 
-  var ANCHOR_MAP    = $.uriAnchor.makeAnchorMap();
+  var recordCount = 0;
+  var anchorMap = $.uriAnchor.makeAnchorMap();
 
   /**
    * Name:        loadData
@@ -9,26 +9,15 @@ var app = function() {
    *              dataloaded event on each new set of data
    */
   function loadData () {
-    var 
-      limit = ( parseInt(ANCHOR_MAP['limit']) > 0 ) ? parseInt(ANCHOR_MAP['limit']) : 25,
-      firebaseSurgeData = firebase.database()
-        .ref('uber_surge_data')
-        //.orderByChild('time')     // Really slow (relaying on hash keys instead at the moment as the temp solution)
-        .limitToLast(limit),
-      dataset;
+    var limit = ( parseInt(anchorMap['limit']) > 0 ) ? parseInt(anchorMap['limit']) : 25;
+        forebaseRef = firebase.database().ref('uber_surge_data');
 
-    firebaseSurgeData.on('value', function(snapshot) {
-    
-      //$('#statusConsole').html("");
-      //$('#statusConsole').append("<div>Received new data from firebase.</div>");
-      // Save Global lastElement for later use
-      dataset = snapshot.val();
-
-      // Push each newly received element into Global data array
-      DATA.push(dataset);
-
-      processData(dataset);
-
+    // Continuous retrieval of new data
+    forebaseRef.limitToLast(limit).on("child_added", function(snapshot) {
+      recordCount += 1;
+      $('#statusConsole').html("");
+      $('#statusConsole').append("<div>Total number of recordsets: "+ recordCount +"</div>");
+      processData(snapshot.val());
     });
   }
 
@@ -37,25 +26,26 @@ var app = function() {
    * Description:   Processes a single chunk of data (either from a data array or
    *                as a result of a new set coming from firebase)
    */
-  function processData(dataset) {
+  function processData(firebaseData) {
 
     //$('#statusConsole').append("<div>Processing data.</div>");
 
-    var
-      serviceType = validateServiceType(ANCHOR_MAP['type']),
-      surgeData;
+    var serviceType = validateServiceType(anchorMap['type']),
+        surgeData;
 
     // Update serviceType to comply with new Uber API specs
-    if (dataset.time >= 1473292800) {
+    if (firebaseData.time >= 1473292800) {
       if (['uberSELECT', 'UberSUV', 'UberBLACK'].indexOf(serviceType) > -1){
         serviceType = serviceType.replace(/uber/gi, "");
       }
     }
 
-    for (key in dataset) {
-      surgeData = getServiceTypeSurge(dataset[key].data, serviceType);
-      formatAndOutput(dataset[key].time, surgeData, serviceType);
-    }
+    //for (key in dataset) {
+    //surgeData = getServiceTypeSurge(dataset[key].data, serviceType);
+    //formatAndOutput(dataset[key].time, surgeData, serviceType);
+    //}
+    surgeData = getServiceTypeSurge(firebaseData.data, serviceType);
+    formatAndOutput(firebaseData.time, surgeData, serviceType);
   }
 
   /**
@@ -66,10 +56,9 @@ var app = function() {
    * @returns {string}    - serviceType from the list of types specified by Uber API
    */
   function validateServiceType( serviceType ) {
-    var
-      validTypes = ['UberX', 'UberXL', 'WAV', 'Select', 'Black SUV', 'Black', 'Assist'],
-      index = -1,
-      matchFound;
+    var validTypes = ['UberX', 'UberXL', 'WAV', 'Select', 'Black SUV', 'Black', 'Assist'],
+        index = -1,
+        matchFound;
 
     // Lowercase the type in question
     serviceType = ( typeof serviceType === 'string' ) ? serviceType.toLowerCase() : '';
@@ -114,20 +103,18 @@ var app = function() {
   function formatAndOutput( time, values, serviceType ) {
     
     //$('#statusConsole').append("<div>Formatting Output.</div>");
-
-    var
-      newSet = $('<div class="aSet">'),
-      timeObj = ( new Date(parseInt( time ) * 1000) ),
-      time = timeObj.toLocaleTimeString() +' '+ timeObj.toLocaleDateString(),
-      val;
+    
+    var newSet = $('<div class="aSet">'),
+        timeObj = ( new Date(parseInt( time ) * 1000) ),
+        time = timeObj.toLocaleTimeString() +' '+ timeObj.toLocaleDateString(),
+        val;
 
     newSet.hide();
 
     // Generating a sorted array of values (based on surge price)
     var arrOfValues = [{location: "----------------------------------------", surge: 1}];
     for (loc in values){
-      var
-          surge = parseFloat(values[loc]),
+      var surge = parseFloat(values[loc]),
           obj = {location: loc, surge: surge};
 
       if (surge > 1){
@@ -148,7 +135,7 @@ var app = function() {
       }
       else {
         // if surge is 1 add to the end of array (standard behaviour)
-        arrOfValues.push(obj);
+        //arrOfValues.push(obj);
       }
     }
 
@@ -174,8 +161,8 @@ var app = function() {
 
   function onHashchange( event ) {
 
-    var oldAnchorMap = ANCHOR_MAP;
-    ANCHOR_MAP = $.uriAnchor.makeAnchorMap();
+    var oldAnchorMap = anchorMap;
+    anchorMap = $.uriAnchor.makeAnchorMap();
 
     // Clear the display
     $('.data').empty();
@@ -187,8 +174,7 @@ var app = function() {
   }
 
   function onTypeChange( event ) {
-    var
-      newType = event.target.firstChild.data;
+    var newType = event.target.firstChild.data;
 
     anchorMap = {type: newType};
     $.uriAnchor.setAnchor( anchorMap );

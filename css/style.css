@@ -6,6 +6,10 @@ body {
   background: #e1ceb1;
 }
 
+#statusConsole {
+  padding: 7px 0 0 0;
+}
+
 .unprepedData {
   display: none;
 }
@@ -17,27 +21,22 @@ body {
 
 .aSet {
   overflow: auto;
-  padding: 10px;
-  border-bottom: 1px solid black;
+  margin: 10px 0 10px 0;
 }
 
 .row {
-  font: "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
   clear: both;
   display: block;
   overflow: auto;
 }
 
 .header {
-  font-family: monospace;
+  font-family: "Arial";
+  border-top: 1px solid black;
   border-bottom: 1px solid black;
-  padding-bottom: 8px;
-  font-size: 18px;
+  padding: 7px 0 7px 0;
+  margin-bottom: 10px;
   font-weight: bold;
-}
-
-.row > div {
-  float: left;
 }
 
 .row .serviceType {
@@ -61,17 +60,18 @@ body {
     border-color: #9e9c9b;
     padding: 0;
     font-weight: bold;
-    font-size: 3.5vw;
+    font-size: 3vw;
   }
 
   .row .neighbourhood {
-    text-align: right;
-    width: 65%;
+    text-align: left;
+    float: left;
+    paddigg-top: 5px;
   }
 
   .row .surge {
     text-align: center;
-    width: 35%;
+    float: right;
   }
 }
 
